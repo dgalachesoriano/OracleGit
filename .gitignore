@@ -30,3 +30,6 @@ pytest_cache/
 # Archivos de entorno local
 .env
 *.env
+
+# Ignore generated snapshots
+data/
