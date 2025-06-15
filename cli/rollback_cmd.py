@@ -3,7 +3,8 @@ import os
 import click
 
 from adapters.filesystem_snapshot_repository import FileSystemSnapshotRepository
-from adapters.mocks.mock_database_connector import MockDatabaseConnector
+from adapters.oracle.oracle_connector import OracleDatabaseConnector
+from config.env import ORACLE_DSN, ORACLE_PASSWORD, ORACLE_USER
 from core.application.diff_service import DiffService
 from core.application.rollback_service import RollbackService
 from core.application.snapshot_service import SnapshotService
@@ -27,7 +28,9 @@ def rollback_snapshot(table_name, snapshot_file, keys, output_path):
     """Generate rollback SQL statements to revert a table to a previous snapshot"""
 
     # Dependencias
-    db = MockDatabaseConnector()
+    db = OracleDatabaseConnector(
+        user=ORACLE_USER, password=ORACLE_PASSWORD, dsn=ORACLE_DSN
+    )
     repo = FileSystemSnapshotRepository(base_path=SNAPSHOT_DIR)
 
     snapshot_service = SnapshotService(db_connector=db, snapshot_repository=repo)

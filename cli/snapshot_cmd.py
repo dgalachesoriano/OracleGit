@@ -3,7 +3,8 @@ import os
 import click
 
 from adapters.filesystem_snapshot_repository import FileSystemSnapshotRepository
-from adapters.mocks.mock_database_connector import MockDatabaseConnector
+from adapters.oracle.oracle_connector import OracleDatabaseConnector
+from config.env import ORACLE_DSN, ORACLE_PASSWORD, ORACLE_USER
 from core.application.snapshot_service import SnapshotService
 from core.domain.models import ParamSnapshot
 
@@ -25,7 +26,9 @@ def create_snapshot(table_name):
     os.makedirs(SNAPSHOT_DIR, exist_ok=True)
 
     # Instanciar dependencias reales para CLI
-    db = MockDatabaseConnector()
+    db = OracleDatabaseConnector(
+        user=ORACLE_USER, password=ORACLE_PASSWORD, dsn=ORACLE_DSN
+    )
     repo = FileSystemSnapshotRepository(base_path=SNAPSHOT_DIR)
     service = SnapshotService(db_connector=db, snapshot_repository=repo)
 
@@ -42,8 +45,8 @@ def list_snapshots(table_name):
     """List all available snapshots for a table"""
 
     # Instanciar dependencias
-    db = (
-        MockDatabaseConnector()
+    db = OracleDatabaseConnector(
+        user=ORACLE_USER, password=ORACLE_PASSWORD, dsn=ORACLE_DSN
     )  # No se usa, pero es necesario para instanciar el servicio
     repo = FileSystemSnapshotRepository(base_path=SNAPSHOT_DIR)
     service = SnapshotService(db_connector=db, snapshot_repository=repo)
