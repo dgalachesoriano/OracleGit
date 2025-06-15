@@ -1,0 +1,39 @@
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+skip-string-normalization = false
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_first_party = ["core", "tests"]
+known_third_party = ["pytest", "unittest"]
+skip = ["venv"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "--strict-markers"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+markers = []
+
+[tool.coverage.run]
+source = ["core/application"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

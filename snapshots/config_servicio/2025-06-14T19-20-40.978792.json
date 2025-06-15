@@ -1,0 +1,16 @@
+{
+  "table_name": "config_servicio",
+  "timestamp": "2025-06-14T19:20:40.978792",
+  "entries": [
+    {
+      "clave": "timeout",
+      "valor": "30",
+      "activo": true
+    },
+    {
+      "clave": "modo",
+      "valor": "SAFE",
+      "activo": true
+    }
+  ]
+}
