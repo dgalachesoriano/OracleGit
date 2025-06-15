@@ -1,10 +1,11 @@
-import os
 import json
+import os
 from datetime import datetime
 from typing import List
+
+from adapters.serializers import snapshot_from_dict, snapshot_to_dict
 from core.domain.interfaces.snapshot_repository import ISnapshotRepository
 from core.domain.models import ParamSnapshot
-from adapters.serializers import snapshot_to_dict, snapshot_from_dict
 
 
 class FileSystemSnapshotRepository(ISnapshotRepository):
@@ -25,7 +26,8 @@ class FileSystemSnapshotRepository(ISnapshotRepository):
         print(f"[✔] Snapshot guardado en {full_path}")
 
     def load(self, path: str) -> ParamSnapshot:
-        with open(path, "r", encoding="utf-8") as f:
+        complete_path = os.path.join(self.base_path, path)
+        with open(complete_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return snapshot_from_dict(data)
 
@@ -35,23 +37,19 @@ class FileSystemSnapshotRepository(ISnapshotRepository):
             return []
 
         files = [
-            os.path.join(folder, f)
-            for f in os.listdir(folder)
-            if f.endswith(".json")
+            os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(".json")
         ]
 
         return sorted(files)
 
     def load_latest(self, table_name: str) -> ParamSnapshot:
-      snapshot_paths = self.list_snapshots(table_name)
-      if not snapshot_paths:
-          raise FileNotFoundError(f"No hay snapshots para la tabla '{table_name}'")
+        snapshot_paths = self.list_snapshots(table_name)
+        if not snapshot_paths:
+            raise FileNotFoundError(f"No hay snapshots para la tabla '{table_name}'")
 
-      # Cargar todos los snapshots para obtener su timestamp real
-      snapshots_with_paths = [
-          (self.load(path), path) for path in snapshot_paths
-      ]
+        # Cargar todos los snapshots para obtener su timestamp real
+        snapshots_with_paths = [(self.load(path), path) for path in snapshot_paths]
 
-      # Ordenar por snapshot.timestamp (tipo datetime)
-      latest_snapshot, _ = max(snapshots_with_paths, key=lambda sp: sp[0].timestamp)
-      return latest_snapshot
+        # Ordenar por snapshot.timestamp (tipo datetime)
+        latest_snapshot, _ = max(snapshots_with_paths, key=lambda sp: sp[0].timestamp)
+        return latest_snapshot
