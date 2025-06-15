@@ -1,0 +1,32 @@
+# Entornos virtuales
+.venv/
+env/
+venv/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs y dumps
+*.log
+*.out
+
+# VSCode settings
+.vscode/
+
+# Archivos de test y cobertura
+htmlcov/
+.coverage
+.cache/
+pytest_cache/
+
+# Archivos de Black, isort, flake8 (temporales o cache)
+.mypy_cache/
+.dmypy.json
+.pytest_cache/
+*.cover
+
+# Archivos de entorno local
+.env
+*.env
