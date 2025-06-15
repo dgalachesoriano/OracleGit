@@ -1,78 +1,165 @@
+# OracleGit
 
-OracleGit is a lightweight version control system for configuration tables in Oracle databases — inspired by Git.
-
-It allows you to create snapshots of parameter tables, track differences between versions, and restore previous states — especially useful in environments where changes are made directly using SQL `INSERT`, `UPDATE`, and `DELETE`.
-
----
-
-## 🚀 Key Features
-
-- Create timestamped snapshots of any configuration table
-- Compare differences between two snapshots (`diff`)
-- Roll back to a previous state (`rollback`)
-- Modular and extensible architecture (Hexagonal / Ports & Adapters)
-- Designed to integrate with Oracle DB (mock connector provided)
+**OracleGit** is a CLI tool for managing configuration tables in Oracle databases as if they were version-controlled with Git.  
+It allows you to take snapshots, compare changes, and generate rollback SQL scripts to safely revert parameter changes.
 
 ---
 
+## 📦 Features
 
-## ⚙️ Setup Instructions
+- Snapshot creation of parameter tables (`INSERT`, `UPDATE`, `DELETE`)
+- Store snapshots as JSON files
+- Compare two snapshots (`diff`) using primary key fields
+- Generate rollback SQL scripts based on differences
+- Delete, inspect and list historical snapshots
+- File-system and database-agnostic architecture
 
-### 1. Clone the repository
+---
 
-git clone https://github.com/dgalachesoriano/OracleGit.git
+## ⚙️ Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-user/OracleGit.git
 cd OracleGit
-2. Create a virtual environment
+```
 
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+2. (Optional) Create and activate a virtual environment:
 
-3. Install dependencies
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3. Install the dependencies:
+
+```bash
 pip install -r requirements.txt
-🧪 Run Tests
-Run all tests with coverage report:
+```
 
-pytest --cov=core/application --cov-report=term-missing
-Or use the Makefile:
+4. Create a `.env` file in the root directory:
 
+```dotenv
+ORACLE_USER=your_user
+ORACLE_PASSWORD=your_password
+ORACLE_DSN=host:port/service_name
+```
 
-make test
-make coverage
-🧹 Pre-commit Hooks
-To ensure code quality and consistency, install pre-commit:
+---
 
+## 🚀 CLI Usage
 
-pre-commit install
-It will automatically run tools like black, flake8, and isort before each commit.
+All commands are available through the main entrypoint:
 
-✅ CI/CD
-GitHub Actions automatically runs tests and coverage on:
+```bash
+python cli/main.py [command]
+```
 
-Every push to master
+---
 
-Every pull request targeting master
+### 🔍 Snapshot Commands
 
-You can see workflows in the Actions tab.
+#### Create a snapshot of a table
 
-🗺️ Roadmap
-✅ Snapshot creation and storage (mock-based)
+```bash
+python cli/main.py snapshot create <table_name>
+```
 
-✅ Diff service for comparing table states
+#### List all snapshots for a table
 
-✅ Rollback to previous snapshot
+```bash
+python cli/main.py snapshot list <table_name>
+```
 
-⏳ Oracle database connector (real)
+#### Show the contents of a snapshot file
 
-⏳ CLI interface (e.g., oraclegit snapshot create <table_name>)
+```bash
+python cli/main.py snapshot show <path_to_snapshot_file>
+```
 
-⏳ Public REST API for integration
+#### Delete a snapshot file
 
-⏳ Snapshot metadata search & filtering
+```bash
+python cli/main.py snapshot delete <path_to_snapshot_file>
+```
 
-⏳ Audit logging and change history viewer
+---
 
-👤 Author
-Created by David Galache
-License: MIT
+### 🧾 Diff Command
 
-⚠️ This is a personal project built for educational and professional growth. Not yet production-ready.
+Compare two snapshots of a table using key fields:
+
+```bash
+python cli/main.py diff <table_name> --from <old_snapshot.json> --to <new_snapshot.json> --keys id
+```
+
+---
+
+### 🔁 Rollback Command
+
+Generate SQL to rollback from the current database state to a previous snapshot:
+
+```bash
+python cli/main.py rollback <table_name> --to <snapshot_file> --keys id
+```
+
+Optional: save SQL to a file
+
+```bash
+python cli/main.py rollback <table_name> --to <snapshot_file> --keys id --output rollback_script.sql
+```
+
+---
+
+## 🔐 Environment Variables
+
+These must be defined in a `.env` file in the root directory:
+
+| Variable          | Description                |
+|------------------|----------------------------|
+| `ORACLE_USER`    | Oracle DB username         |
+| `ORACLE_PASSWORD`| Oracle DB password         |
+| `ORACLE_DSN`     | Oracle DSN (host:port/sid) |
+
+---
+
+## 🧪 Testing
+
+Run unit tests with coverage:
+
+```bash
+pytest --cov=core
+```
+
+---
+
+## 📁 Project Structure (Simplified)
+
+```
+OracleGit/
+├── cli/                   # Command-line interface
+├── core/                  # Application logic & services
+├── adapters/              # Oracle, mock and filesystem
+├── config/                # Environment loading
+├── tests/                 # Pytest-based tests
+├── .env                   # Oracle credentials (not committed)
+└── requirements.txt       # Python dependencies
+```
+
+---
+
+## 📌 TODO
+
+- Connect to real Oracle DB (already supported via oracledb)
+- Snapshot diff visualization improvements
+- Integration with Git history?
+- Web UI?
+
+---
+
+## 🛠 Built with
+
+- Python 3.12
+- `click`, `pytest`, `oracledb`, `dotenv`
+- Clean hexagonal architecture
