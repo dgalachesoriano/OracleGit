@@ -4,6 +4,7 @@ import click
 
 from adapters.filesystem_snapshot_repository import FileSystemSnapshotRepository
 from adapters.oracle.oracle_connector import OracleDatabaseConnector
+from cli.interactive_utils import select_snapshot_file
 from config.env import ORACLE_DSN, ORACLE_PASSWORD, ORACLE_USER
 from core.application.snapshot_service import SnapshotService
 from core.domain.models import ParamSnapshot
@@ -64,14 +65,18 @@ def list_snapshots(table_name):
 
 
 @snapshot.command("show")
-@click.argument("file_path")
-def show_snapshot(file_path):
-    """Show the contents of a snapshot JSON file"""
+@click.argument("path", required=False)
+@click.option("--interactive", is_flag=True, help="Use interactive file selection")
+def show_snapshot(path, interactive):
+    if interactive or not path:
+        path = select_snapshot_file()
+        if not path:
+            return
 
     repo = FileSystemSnapshotRepository(base_path=SNAPSHOT_DIR)
 
     try:
-        snapshot = repo.load(file_path)
+        snapshot = repo.load(path)
         click.echo(f"📄 Snapshot from: {snapshot.timestamp}")
         click.echo(f"📌 Table: {snapshot.table_name}")
         click.echo(f"🔢 Entries: {len(snapshot.entries)}")
