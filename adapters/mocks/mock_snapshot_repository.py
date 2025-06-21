@@ -17,5 +17,7 @@ class MockSnapshotRepository(ISnapshotRepository):
         # En este mock, el 'path' es la clave simulada
         snapshot = self._storage.get(path)
         if not snapshot:
-            raise FileNotFoundError(f"[MOCK] Snapshot no encontrado para la clave '{path}'")
+            raise FileNotFoundError(
+                f"[MOCK] Snapshot no encontrado para la clave '{path}'"
+            )
         return snapshot

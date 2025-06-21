@@ -1,16 +1,20 @@
-from core.domain.interfaces.diff_service import IDiffService
+from typing import Dict, List, Tuple
+
 from core.domain.dto.diff_result_dto import DiffResultDTO
+from core.domain.interfaces.diff_service import IDiffService
 from core.domain.models import ParamSnapshot
-from typing import List, Dict, Tuple
+from core.domain.utils.validation import validate_key_fields
 
 
 class DiffService(IDiffService):
     def compare_snapshots(
-        self,
-        old: ParamSnapshot,
-        new: ParamSnapshot,
-        key_fields: List[str]
+        self, old: ParamSnapshot, new: ParamSnapshot, key_fields: List[str]
     ) -> DiffResultDTO:
+
+        if not validate_key_fields(old.entries, key_fields) or not validate_key_fields(
+            new.entries, key_fields
+        ):
+            raise ValueError("Some entries do not contain the required key fields.")
 
         def extract_key(entry: Dict) -> Tuple:
             return tuple(entry.get(field) for field in key_fields)
@@ -34,10 +38,6 @@ class DiffService(IDiffService):
                 added.append(new_val)
             elif old_val != new_val:
                 # Cambió algún valor (aunque tiene la misma clave)
-                changed.append({
-                    "key": key,
-                    "before": old_val,
-                    "after": new_val
-                })
+                changed.append({"key": key, "before": old_val, "after": new_val})
 
         return DiffResultDTO(added=added, removed=removed, changed=changed)

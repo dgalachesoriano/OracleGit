@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from .models import ParamSnapshot
+
 
 class ISnapshotRepository(ABC):
     @abstractmethod
@@ -9,6 +11,7 @@ class ISnapshotRepository(ABC):
     @abstractmethod
     def load(self, path: str) -> ParamSnapshot:
         pass
+
 
 class IDatabaseConnector(ABC):
     @abstractmethod

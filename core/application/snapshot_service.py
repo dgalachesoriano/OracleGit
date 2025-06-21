@@ -1,12 +1,15 @@
+from datetime import UTC, datetime
+from typing import List
+
 from core.domain.interfaces.database_connector import IDatabaseConnector
 from core.domain.interfaces.snapshot_repository import ISnapshotRepository
-from core.domain.models import ParamSnapshot, ParamEntry
-from datetime import datetime, UTC
-from typing import List
+from core.domain.models import ParamEntry, ParamSnapshot
 
 
 class SnapshotService:
-    def __init__(self, db_connector: IDatabaseConnector, snapshot_repository: ISnapshotRepository):
+    def __init__(
+        self, db_connector: IDatabaseConnector, snapshot_repository: ISnapshotRepository
+    ):
         self.db_connector = db_connector
         self.snapshot_repository = snapshot_repository
 
@@ -19,9 +22,7 @@ class SnapshotService:
         entries = [ParamEntry(values=row) for row in raw_rows]
 
         snapshot = ParamSnapshot(
-            table_name=table_name,
-            timestamp=datetime.now(UTC),
-            entries=entries
+            table_name=table_name, timestamp=datetime.now(UTC), entries=entries
         )
 
         self.snapshot_repository.save(snapshot)

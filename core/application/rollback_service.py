@@ -1,16 +1,23 @@
-from core.domain.interfaces.rollback_service import IRollbackService
+from typing import Dict, List
+
 from core.domain.dto.diff_result_dto import DiffResultDTO
-from typing import List, Dict
+from core.domain.interfaces.rollback_service import IRollbackService
+from core.domain.utils.validation import validate_key_fields
 
 
 class RollbackService(IRollbackService):
     def generate_rollback_sql(
-        self,
-        diff: DiffResultDTO,
-        table_name: str,
-        key_fields: List[str]
+        self, diff: DiffResultDTO, table_name: str, key_fields: List[str]
     ) -> List[str]:
         sql_statements = []
+
+        if not validate_key_fields(
+            diff.removed + [c["before"] for c in diff.changed if "before" in c],
+            key_fields,
+        ):
+            raise ValueError(
+                "Missing key fields in removed/changed entries. Cannot generate rollback SQL."
+            )
 
         def where_clause(entry: Dict) -> str:
             return " AND ".join(f"{k} = '{entry[k]}'" for k in key_fields if k in entry)
@@ -34,7 +41,9 @@ class RollbackService(IRollbackService):
         for change in diff.changed:
             before = change.get("before")
             if before and all(k in before for k in key_fields):
-                set_clause = ", ".join(f"{col} = '{val}'" for col, val in before.items())
+                set_clause = ", ".join(
+                    f"{col} = '{val}'" for col, val in before.items()
+                )
                 sql = f"UPDATE {table_name} SET {set_clause} WHERE {where_clause(before)};"
             else:
                 sql = f"-- [AVISO] Clave incompleta para UPDATE: {change}"

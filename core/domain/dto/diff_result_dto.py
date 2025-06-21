@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 class DiffResultDTO:
@@ -6,7 +6,7 @@ class DiffResultDTO:
         self,
         added: List[Dict],
         removed: List[Dict],
-        changed: Optional[List[Dict]] = None
+        changed: Optional[List[Dict]] = None,
     ):
         self.added = added
         self.removed = removed
@@ -16,8 +16,4 @@ class DiffResultDTO:
         return not self.added and not self.removed and not self.changed
 
     def to_dict(self) -> Dict[str, List[Dict]]:
-        return {
-            "added": self.added,
-            "removed": self.removed,
-            "changed": self.changed
-        }
+        return {"added": self.added, "removed": self.removed, "changed": self.changed}

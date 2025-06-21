@@ -1,4 +1,5 @@
 import pytest
+
 from core.application.rollback_service import RollbackService
 from core.domain.dto.diff_result_dto import DiffResultDTO
 
@@ -7,9 +8,7 @@ def test_rollback_sql_generation(diff_result_example):
     rollback_service = RollbackService()
 
     sql_statements = rollback_service.generate_rollback_sql(
-        diff=diff_result_example,
-        table_name="config_servicio",
-        key_fields=["clave"]
+        diff=diff_result_example, table_name="config_servicio", key_fields=["clave"]
     )
 
     assert len(sql_statements) == 3
@@ -32,13 +31,14 @@ def test_rollback_sql_generation(diff_result_example):
     assert "valor = '30'" in update_sql
     assert "clave = 'timeout'" in update_sql
 
+
 def test_rollback_sql_with_composite_keys(diff_compuesto_example):
     rollback_service = RollbackService()
 
     sql_statements = rollback_service.generate_rollback_sql(
         diff=diff_compuesto_example,
         table_name="param_paises",
-        key_fields=["tipo", "codigo"]
+        key_fields=["tipo", "codigo"],
     )
 
     assert len(sql_statements) == 3
@@ -63,18 +63,18 @@ def test_rollback_sql_with_composite_keys(diff_compuesto_example):
     assert "tipo = 'pais'" in update_sql
     assert "codigo = 'IT'" in update_sql
 
+
 def test_rollback_sql_added_with_missing_key():
     rollback_service = RollbackService()
 
     diff = DiffResultDTO(
-        added=[{"valor": "x"}],  # falta "clave"
-        removed=[],
-        changed=[]
+        added=[{"valor": "x"}], removed=[], changed=[]  # falta "clave"
     )
 
     sql = rollback_service.generate_rollback_sql(diff, "mi_tabla", key_fields=["clave"])
 
     assert sql[0].startswith("-- [AVISO]")
+
 
 def test_rollback_sql_with_missing_before_data():
     rollback_service = RollbackService()
@@ -84,7 +84,7 @@ def test_rollback_sql_with_missing_before_data():
         removed=[],
         changed=[
             {"key": ("x",), "before": None, "after": {"clave": "x", "valor": "nuevo"}}
-        ]
+        ],
     )
 
     sql = rollback_service.generate_rollback_sql(diff, "mi_tabla", key_fields=["clave"])
